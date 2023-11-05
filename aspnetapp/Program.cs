@@ -6,30 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<CounterContext>();
 builder.Services.AddSignalR();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
 
-//app.Use(async (context, next) =>
-//{
-//    if (context.Request.Path == "/ws")
-//    {
-//        if (context.WebSockets.IsWebSocketRequest)
-//        {
-//            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-//            await MyWebSocket.Echo(webSocket);
-//        }
-//        else
-//        {
-//            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-//        }
-//    }
-//    else
-//    {
-//        await next(context);
-//    }
-
-//});
+//app.Map("/",)
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

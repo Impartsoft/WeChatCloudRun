@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using aspnetapp;
+using System.Text.Json;
+using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace aspnetapp.Controllers
+{
+    [Route("api/wx")]
+    [ApiController]
+    public class WeChatAPIController : ControllerBase
+    {
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public WeChatAPIController(IHttpClientFactory httpClientFactory) =>
+            _httpClientFactory = httpClientFactory;
+
+        /// <summary>
+        /// https://localhost:58521/api/wx?url=/wxa/business/gamematch/creatematchrule&jsonValue=11
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="jsonValue"></param>
+        /// <returns></returns>
+        public async Task<object> OnGet(string url, string jsonValue)
+        {
+            var todoItemJson = new StringContent(
+                  jsonValue,
+                  Encoding.UTF8,
+                  Application.Json);
+            var httpResponseMessage = await _httpClientFactory.CreateClient().PostAsync("https://api.weixin.qq.com" + url, todoItemJson);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                using var contentStream =
+                    await httpResponseMessage.Content.ReadAsStreamAsync();
+
+                var s = contentStream.ToString();
+                var s2 = contentStream.Seek(0, SeekOrigin.Begin);
+
+                //string s2 = System.Text.UTF8Encoding.UTF8.GetString(contentStream.ReadTimeout);
+
+                return await JsonSerializer.DeserializeAsync<object>(contentStream);
+            }
+
+            return string.Empty;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<object>> Go(string url, string jsonValue)
+        {
+            return await OnGet(url, jsonValue);
+        }
+    }
+}
